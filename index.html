@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS Gen-AI RCA Architecture</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #F3F4F6; color: #1F2937; }
+        
+        /* Custom Chart Container Styling */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 350px;
+            max-height: 400px;
+        }
+
+        /* Card Hover Effects */
+        .info-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(124, 58, 237, 0.2), 0 4px 6px -2px rgba(13, 148, 136, 0.1);
+        }
+
+        /* CSS Arrow for Flow Diagram (NO SVG) */
+        .arrow-down {
+            width: 0; 
+            height: 0; 
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 15px solid #CBD5E1; /* Slate-300 */
+            margin: 10px auto;
+        }
+
+        /* Process Node Connector Line */
+        .connector-line {
+            width: 4px;
+            height: 30px;
+            background-color: #CBD5E1;
+            margin: 0 auto;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #7C3AED;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6D28D9;
+        }
+    </style>
+    <!-- 
+        Palette: Electric Violet & Teal
+        Primary Logic: #7C3AED (Violet)
+        Primary Data: #0D9488 (Teal)
+        Knowledge: #F59E0B (Amber)
+        
+        Source Analysis: 
+        - 6-Phase Flow: Initiation -> Grounding -> Reasoning -> Audit
+        - Services: Lambda, S3, Bedrock, DynamoDB
+        - Narrative: Speed + Accuracy via Grounding
+    -->
+</head>
+<body class="antialiased">
+
+    <!-- Header Section -->
+    <header class="bg-gradient-to-br from-violet-700 via-violet-600 to-teal-500 text-white p-10 shadow-xl">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0 text-center md:text-left">
+                    <h1 class="text-4xl md:text-6xl font-extrabold tracking-tight mb-2">Gen-AI RCA Flow</h1>
+                    <p class="text-xl opacity-90 font-light">AWS Backend Architecture for Automated Root Cause Analysis</p>
+                </div>
+                <div class="bg-white/10 backdrop-blur-md p-4 rounded-xl border border-white/20">
+                    <div class="text-sm font-semibold uppercase tracking-wider opacity-80 mb-1">Target Speed</div>
+                    <div class="text-3xl font-bold">Real-Time</div>
+                    <div class="text-xs opacity-75">Trace &bull; Correlate &bull; Reason</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto p-6 space-y-16">
+
+        <!-- Introduction -->
+        <section>
+            <div class="bg-white rounded-2xl shadow-sm p-8 border-t-4 border-violet-500">
+                <h2 class="text-3xl font-bold text-gray-800 mb-4">Architecture Objective</h2>
+                <p class="text-gray-600 leading-relaxed text-lg">
+                    The core challenge is to move from manual investigation to an automated, auditable process. 
+                    This architecture leverages <strong>AWS Bedrock</strong> for causal reasoning, grounded by <strong>real-time IoT data from S3</strong> 
+                    and <strong>contextual metadata from DynamoDB</strong>. The system does not guess; it traces the specific barcode through manufacturing phases 
+                    to pinpoint the exact moment of failure.
+                </p>
+            </div>
+        </section>
+
+        <!-- Section 2: Component Distribution (Chart.js) -->
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div class="order-2 md:order-1">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Service Role Distribution</h3>
+                <p class="text-gray-600 mb-6">
+                    A balanced architecture requires distinct handling of Logic, Data, and Delivery. 
+                    The visualization below shows how the AWS services are categorized in this RCA solution, highlighting the heavy reliance on robust Data Ingestion (Teal) to support the Logic (Violet).
+                </p>
+                <!-- Chart Container -->
+                <div class="chart-container">
+                    <canvas id="roleDistributionChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="order-1 md:order-2 space-y-4">
+                <div class="info-card bg-violet-50 p-6 rounded-xl border-l-8 border-violet-600">
+                    <div class="font-bold text-violet-800 text-lg mb-1">🧠 Core Logic (Violet)</div>
+                    <p class="text-sm text-gray-700">AWS Lambda orchestrates the flow, while AWS Bedrock provides the heavy-lifting causal reasoning engine.</p>
+                </div>
+                <div class="info-card bg-teal-50 p-6 rounded-xl border-l-8 border-teal-600">
+                    <div class="font-bold text-teal-800 text-lg mb-1">💾 Data & Delivery (Teal)</div>
+                    <p class="text-sm text-gray-700">DynamoDB handles rapid lookups and audit logs. S3 stores massive IoT telemetry. API Gateway delivers the verdict.</p>
+                </div>
+                <div class="info-card bg-amber-50 p-6 rounded-xl border-l-8 border-amber-500">
+                    <div class="font-bold text-amber-700 text-lg mb-1">📚 Knowledge (Amber)</div>
+                    <p class="text-sm text-gray-700">Vector Databases provide the historical context, ensuring the AI learns from past engineering reports.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: The 6-Phase Execution Flow (Visual Diagram - NO SVG) -->
+        <section>
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800">The 6-Phase Execution Flow</h2>
+                <p class="text-gray-500 mt-2">Tracing a defect from User Query to Grounded Verdict.</p>
+            </div>
+
+            <div class="relative max-w-4xl mx-auto">
+                <!-- Vertical Flow Layout -->
+                
+                <!-- Step 1: Trigger -->
+                <div class="info-card bg-white p-6 rounded-lg shadow-md border-l-8 border-teal-500 relative z-10 w-full md:w-2/3 mx-auto">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded uppercase">Phase 1.1</span>
+                            <h3 class="text-xl font-bold mt-1 text-gray-800">User Query (Chatbot)</h3>
+                            <p class="text-gray-600 text-sm mt-2">Input: <code>Tire Type A</code>, <code>Barcode 4567</code>, <code>Defect 418</code>.</p>
+                        </div>
+                        <div class="text-2xl">🖥️</div>
+                    </div>
+                </div>
+
+                <div class="connector-line"></div>
+                <div class="arrow-down"></div>
+
+                <!-- Step 2: Orchestration -->
+                <div class="info-card bg-white p-6 rounded-lg shadow-md border-l-8 border-violet-600 relative z-10 w-full md:w-2/3 mx-auto">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="bg-violet-100 text-violet-800 text-xs font-bold px-2 py-1 rounded uppercase">Phase 1.2</span>
+                            <h3 class="text-xl font-bold mt-1 text-gray-800">Orchestration (Lambda)</h3>
+                            <p class="text-gray-600 text-sm mt-2">Splits task: Fetches context and prepares AI Agent.</p>
+                        </div>
+                        <div class="text-2xl">⚙️</div>
+                    </div>
+                </div>
+
+                <div class="connector-line"></div>
+                <div class="arrow-down"></div>
+
+                <!-- Step 3: Context Retrieval (Parallel Layout) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full md:w-5/6 mx-auto">
+                    <!-- Left: DynamoDB -->
+                    <div class="info-card bg-teal-50 p-5 rounded-lg border border-teal-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="bg-teal-200 text-teal-900 text-xs font-bold px-2 py-1 rounded">1.3 Metadata</span>
+                            <span class="text-xl">🗂️</span>
+                        </div>
+                        <strong class="block text-teal-900">DynamoDB Lookup</strong>
+                        <p class="text-xs text-teal-800 mt-1">Retrieves Machine ID & Timestamps for Barcode 4567.</p>
+                    </div>
+
+                    <!-- Right: Vector DB -->
+                    <div class="info-card bg-amber-50 p-5 rounded-lg border border-amber-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="bg-amber-200 text-amber-900 text-xs font-bold px-2 py-1 rounded">2.2 History</span>
+                            <span class="text-xl">📚</span>
+                        </div>
+                        <strong class="block text-amber-900">Vector Search</strong>
+                        <p class="text-xs text-amber-800 mt-1">Finds past 5-Why reports for Defect 418.</p>
+                    </div>
+                </div>
+
+                <!-- Step 4: Data Grounding -->
+                <div class="connector-line h-8"></div>
+                <div class="arrow-down"></div>
+                
+                <div class="info-card bg-white p-6 rounded-lg shadow-md border-l-8 border-teal-500 w-full md:w-2/3 mx-auto">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded uppercase">Phase 2.1</span>
+                            <h3 class="text-xl font-bold mt-1 text-gray-800">IoT Ingestion (S3)</h3>
+                            <p class="text-gray-600 text-sm mt-2">Pull raw sensor logs (Temp/Pressure) for the exact time window found in Step 1.3.</p>
+                        </div>
+                        <div class="text-2xl">☁️</div>
+                    </div>
+                </div>
+
+                <div class="connector-line"></div>
+                <div class="arrow-down"></div>
+
+                <!-- Step 5: Bedrock Reasoning -->
+                <div class="info-card bg-violet-600 text-white p-6 rounded-lg shadow-xl shadow-violet-200 transform scale-105 w-full md:w-3/4 mx-auto">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="bg-white/20 text-white text-xs font-bold px-2 py-1 rounded uppercase">Phase 3.2</span>
+                            <h3 class="text-2xl font-bold mt-1">Causal Reasoning (Bedrock)</h3>
+                            <p class="text-violet-100 text-sm mt-2">The Agent fuses the IoT data, Metadata, and History. It performs "Chain-of-Thought" analysis to identify anomalies and link them to known causes.</p>
+                        </div>
+                        <div class="text-3xl">🧠</div>
+                    </div>
+                </div>
+
+                <div class="connector-line"></div>
+                <div class="arrow-down"></div>
+
+                <!-- Step 6: Delivery -->
+                <div class="info-card bg-white p-6 rounded-lg shadow-md border-l-8 border-teal-500 w-full md:w-2/3 mx-auto">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="bg-teal-100 text-teal-800 text-xs font-bold px-2 py-1 rounded uppercase">Phase 4.3</span>
+                            <h3 class="text-xl font-bold mt-1 text-gray-800">Verdict & Audit</h3>
+                            <p class="text-gray-600 text-sm mt-2">The final RCA is logged in DynamoDB for compliance and delivered to the user via Chatbot.</p>
+                        </div>
+                        <div class="text-2xl">💬</div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- Section 4: Tacking Strategy (Matrix) -->
+        <section class="bg-white rounded-2xl shadow-sm p-8 mt-12">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">The Tacking Strategy</h2>
+            <p class="text-gray-600 mb-8">How specific AWS services answer the critical "Who, What, When, Why" of Root Cause Analysis.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-gray-50 rounded-xl p-6 border-t-4 border-violet-500 hover:bg-violet-50 transition-colors">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">What happened?</h4>
+                    <p class="text-sm text-gray-600 mb-4">Causal Reasoning via Gen-AI.</p>
+                    <div class="inline-block bg-violet-100 text-violet-700 text-xs px-2 py-1 rounded font-semibold">AWS Bedrock</div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="bg-gray-50 rounded-xl p-6 border-t-4 border-teal-500 hover:bg-teal-50 transition-colors">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">When was it?</h4>
+                    <p class="text-sm text-gray-600 mb-4">Contextual Time-Slice isolation.</p>
+                    <div class="inline-block bg-teal-100 text-teal-700 text-xs px-2 py-1 rounded font-semibold">DynamoDB / S3</div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="bg-gray-50 rounded-xl p-6 border-t-4 border-amber-500 hover:bg-amber-50 transition-colors">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">Why did it fail?</h4>
+                    <p class="text-sm text-gray-600 mb-4">Grounded Analysis (Data + Docs).</p>
+                    <div class="inline-block bg-amber-100 text-amber-700 text-xs px-2 py-1 rounded font-semibold">Vector DB</div>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="bg-gray-50 rounded-xl p-6 border-t-4 border-violet-500 hover:bg-violet-50 transition-colors">
+                    <h4 class="font-bold text-lg text-gray-800 mb-2">Which Phase?</h4>
+                    <p class="text-sm text-gray-600 mb-4">Architectural Mapping & Tags.</p>
+                    <div class="inline-block bg-violet-100 text-violet-700 text-xs px-2 py-1 rounded font-semibold">Lambda</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Estimated Latency Breakdown -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="md:col-span-1">
+                <h3 class="text-2xl font-bold text-gray-800 mb-2">Performance Breakdown</h3>
+                <p class="text-gray-600 text-sm">
+                    By parallelizing the "Context Retrieval" and "Agent Formation" phases, the architecture minimizes latency. 
+                    The longest step is the deep reasoning performed by the LLM (Bedrock), which ensures accuracy over raw speed.
+                </p>
+            </div>
+            <div class="md:col-span-2">
+                 <!-- Chart Container -->
+                 <div class="chart-container">
+                    <canvas id="latencyChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-500 pt-10 pb-4 border-t border-gray-200 mt-12">
+            <p class="mb-2 font-medium">AWS Gen-AI Root Cause Analysis Architecture</p>
+            <p class="text-xs">Generated based on 'backend_rca_flow.md' | <span class="text-violet-600">No SVG / No Mermaid</span></p>
+        </footer>
+
+    </main>
+
+    <script>
+        // --- Helper Function: Label Wrapping (16 Char Limit) ---
+        function wrapLabel(label) {
+            if (typeof label !== 'string' || label.length <= 16) return label;
+            const words = label.split(' ');
+            const lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if ((currentLine + " " + words[i]).length <= 16) {
+                    currentLine += " " + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        // --- Shared Tooltip Configuration ---
+        const commonTooltipConfig = {
+            callbacks: {
+                title: function(tooltipItems) {
+                    const item = tooltipItems[0];
+                    let label = item.chart.data.labels[item.dataIndex];
+                    if (Array.isArray(label)) {
+                        return label.join(' ');
+                    } else {
+                        return label;
+                    }
+                }
+            }
+        };
+
+        // --- Chart 1: Service Role Distribution (Doughnut) ---
+        const ctxRoles = document.getElementById('roleDistributionChart').getContext('2d');
+        new Chart(ctxRoles, {
+            type: 'doughnut',
+            data: {
+                labels: ['Core Logic (Violet)', 'Data & Access (Teal)', 'Knowledge Base (Amber)'].map(wrapLabel),
+                datasets: [{
+                    data: [35, 45, 20], // Approx distribution based on steps
+                    backgroundColor: ['#7C3AED', '#0D9488', '#F59E0B'],
+                    borderWidth: 0,
+                    hoverOffset: 10
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: commonTooltipConfig,
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { family: 'Outfit', size: 12 },
+                            usePointStyle: true
+                        }
+                    }
+                },
+                cutout: '70%'
+            }
+        });
+
+        // --- Chart 2: Latency Simulation (Bar) ---
+        const ctxLatency = document.getElementById('latencyChart').getContext('2d');
+        new Chart(ctxLatency, {
+            type: 'bar',
+            data: {
+                labels: ['Initiation (Lambda)', 'Context (Dynamo)', 'Ingestion (S3)', 'History (Vector)', 'Reasoning (Bedrock)', 'Delivery (API)'].map(wrapLabel),
+                datasets: [{
+                    label: 'Estimated Processing Time (ms)',
+                    data: [150, 80, 200, 300, 2500, 100], // Bedrock is the heavy lifter
+                    backgroundColor: [
+                        '#7C3AED', // Violet (Logic)
+                        '#0D9488', // Teal (Data)
+                        '#0D9488', // Teal (Data)
+                        '#F59E0B', // Amber (Knowledge)
+                        '#7C3AED', // Violet (Logic)
+                        '#0D9488'  // Teal (Data)
+                    ],
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // Horizontal Bar for better text reading
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { display: false }
+                    },
+                    y: {
+                        grid: { display: false }
+                    }
+                },
+                plugins: {
+                    tooltip: commonTooltipConfig,
+                    legend: { display: false }
+                }
+            }
+        });
+
+    </script>
+</body>
+</html>
